@@ -4,8 +4,11 @@ namespace App\Controller;
 
 use App\Entity\Product;
 use App\Entity\Category;
+use App\Form\ProductFormType;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
@@ -24,28 +27,57 @@ class ProductController extends AbstractController
     /**
      * @Route("/product/new", name="new_product")
      */
-    public function save(): Response
+    public function save(EntityManagerInterface $em, Request $request): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $form = $this->createForm(ProductFormType::class);
 
-        $categoryRepository = $em->getRepository(Category::class);
+        $form->handleRequest($request);
+        if ($form->isSubmitted() && $form->isValid()) {
+            // dd($form->getData());
+            $data = $form->getData();
+
+            $categoryRepository = $em->getRepository(Category::class);
+                    
+            $category = $categoryRepository->find($data['category']);
+            $newProduct = new Product();
+
+
+            $newProduct
+                ->setCode($data['code'])
+                ->setName($data['name'])
+                ->setDescription($data['description'])
+                ->setBrand($data['brand'])
+                ->setCategory($category)
+                ->setPrice($data['price']);
+
+            $em->persist($newProduct);
+            $em->flush();
+        }
         
-        $category = $categoryRepository->find(1);
+        return $this->render('product/new.html.twig', [
+            'productForm' => $form->createView()
+        ]);
 
-        $newProduct = new Product();
+        // $em = $this->getDoctrine()->getManager();
 
-        $newProduct
-            ->setCode('1')
-            ->setName('Dolex')
-            ->setDescription('Antinflamatorio')
-            ->setBrand('Genfar')
-            ->setCategory($category)
-            ->setPrice(12000);
+        // $categoryRepository = $em->getRepository(Category::class);
+        
+        // $category = $categoryRepository->find(1);
 
-        $em->persist($newProduct);
-        $em->flush();
+        // $newProduct = new Product();
 
-        return new Response('Saved new product with id '.$newProduct->getId());
+        // $newProduct
+        //     ->setCode('1')
+        //     ->setName('Dolex')
+        //     ->setDescription('Antinflamatorio')
+        //     ->setBrand('Genfar')
+        //     ->setCategory($category)
+        //     ->setPrice(12000);
+
+        // $em->persist($newProduct);
+        // $em->flush();
+
+        // return new Response('Saved new product with id '.$newProduct->getId());
     }
 
     /**
