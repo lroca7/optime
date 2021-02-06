@@ -7,6 +7,19 @@
 <style>
     .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
     .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+
+    table {
+      border: 1px solid lightgray;
+    }
+
+    table .actions {
+      text-align: right;
+    }
+
+    .table-pagination{
+      display: flex;
+      justify-content: flex-end;
+    }
 </style>
 
 <div class="example-wrapper">
@@ -16,19 +29,30 @@
         <div class="row">
             <div class="col-12">
                 <h1>List Products</h1>
-                <table class="table table-striped">
+                <a class="btn btn-xs btn-success mb-2"  onclick="getExcel()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-spreadsheet" viewBox="0 0 16 16">
+                    <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V9H3V2a1 1 0 0 1 1-1h5.5v2zM3 12v-2h2v2H3zm0 1h2v2H4a1 1 0 0 1-1-1v-1zm3 2v-2h3v2H6zm4 0v-2h3v1a1 1 0 0 1-1 1h-2zm3-3h-3v-2h3v2zm-7 0v-2h3v2H6z"/>
+                  </svg> 
+                  Download
+                </a>
+                <a class="btn btn-xs btn-primary mb-2"  href="{{ path('new_product') }}">                  
+                  New
+                </a>
+                <table class="table table-hover">
                     <tr>
                         <th>Code</th>
                         <th>Name</th>
+                        <th>Brand</th>
                         <th>Price</th>
-                        <th>&nbsp;</th>
+                        <th >&nbsp;</th>
                     </tr>
                     {% for product in products %}
                         <tr>
                             <td>{{ product.code }}</td>
-                            <td>{{ product.name }}</td>
+                            <td>{{ product.name }}</td>                            
+                            <td>{{ product.brand }}</td>
                             <td>{{ product.price }}</td>
-                            <td>
+                            <td class="actions">
                                 <a href="{{ path('product_edit', {'id': product.id}) }}" class="btn btn-xs btn-primary">
                                   Edit
                                 </a>
@@ -42,24 +66,15 @@
                         
                     {% endfor %}
                 </table>
-                <!-- Modal -->
-                        <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                          <div class="modal-dialog">
-                            <div class="modal-content">
-                              <div class="modal-header">
-                                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                              </div>
-                              <div class="modal-body">
-                                ...
-                              </div>
-                              <div class="modal-footer">
-                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" class="btn btn-primary">Save changes</button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                <nav class="table-pagination" aria-label="Page navigation example">
+                  <ul class="pagination">
+                    <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                    <li class="page-item"><a class="page-link" href="#">1</a></li>
+                    <li class="page-item"><a class="page-link" href="#">2</a></li>
+                    <li class="page-item"><a class="page-link" href="#">3</a></li>
+                    <li class="page-item"><a class="page-link" href="#">Next</a></li>
+                  </ul>
+                </nav>
             </div>
         </div>
     </div>
@@ -79,6 +94,27 @@
           .then(res => res.json()) // or res.json()
           .then(res => console.log(res))
         }
+
+      }
+
+      function getExcel() {
+        
+        debugger
+        let url = 'http://localhost:8000/product/excel'; 
+          
+          fetch(url, {
+              method: 'GET'
+          })
+          .then(response => response.blob())
+          .then(blob => {
+              var url = window.URL.createObjectURL(blob);
+              var a = document.createElement('a');
+              a.href = url;
+              a.download = "products.xlsx";
+              document.body.appendChild(a); // we need to append the element to the dom -> otherwise it will not work in firefox
+              a.click();    
+              a.remove();  //afterwards we remove the element again         
+          });
 
       }
     </script>

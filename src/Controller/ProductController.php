@@ -13,6 +13,13 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
+
+// Include PhpSpreadsheet required namespaces
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
 class ProductController extends AbstractController
 {
     /**
@@ -194,5 +201,55 @@ class ProductController extends AbstractController
 
             return new JsonResponse(['msj' => 'Product deleted'], Response::HTTP_OK);
         }
+    }
+
+    private function getData(): array
+    {
+        $em = $this->getDoctrine()->getManager();
+        $list = [];
+        $products = $em->getRepository(Product::class)->findAll();
+
+        foreach ($products as $product) {
+            $list[] = [
+                $product->getCode(),
+                $product->getName(),
+                $product->getDescription(),
+                $product->getBrand(),
+                $product->getPrice()
+            ];
+        }
+        return $list;
+    }
+
+    /**
+     * @Route("/product/excel", name="product_excel")
+     */
+    public function generateExcel()
+    {
+        $spreadsheet = new Spreadsheet();
+        
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->getCell('A1')->setValue('Code');
+        $sheet->getCell('B1')->setValue('Name');
+        $sheet->getCell('C1')->setValue('Description');
+        $sheet->getCell('D1')->setValue('Brand');
+        $sheet->getCell('E1')->setValue('Price');
+        
+        // Increase row cursor after header write
+        $sheet->fromArray($this->getData(),null, 'A2', true);
+
+        // Create your Office 2007 Excel (XLSX Format)
+        $writer = new Xlsx($spreadsheet);
+        
+        // Create a Temporary file in the system
+        $fileName = 'excel.xlsx';
+        $temp_file = tempnam(sys_get_temp_dir(), $fileName);
+        
+        // Create the excel file in the tmp directory of the system
+        $writer->save($temp_file);
+        
+        // Return the excel file as an attachment
+        return $this->file($temp_file, $fileName, ResponseHeaderBag::DISPOSITION_INLINE);
     }
 }
