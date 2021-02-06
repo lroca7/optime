@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+{# {% import "macros.html" as macros %} #}
+
+{% block title %}New Product!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<div class="example-wrapper">
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h1>List Products</h1>
+                <table class="table table-striped">
+                    <tr>
+                        <th>Code</th>
+                        <th>Name</th>
+                        <th>Price</th>
+                        <th>&nbsp;</th>
+                    </tr>
+                    {% for product in products %}
+                        <tr>
+                            <td>{{ product.code }}</td>
+                            <td>{{ product.name }}</td>
+                            <td>{{ product.price }}</td>
+                            <td>
+                                <a href="{{ path('product_edit', {'id': product.id}) }}" class="btn btn-xs btn-primary">
+                                  Edit
+                                </a>
+                                <a class="btn btn-xs btn-danger"  onclick="openModal({{ product.id }})">
+                                  Delete
+                                </a>
+                                {# <button onclick="openModal()">Show Approved Course</button>    #}
+                              
+                            </td>
+                        </tr>
+                        
+                    {% endfor %}
+                </table>
+                <!-- Modal -->
+                        <div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                          <div class="modal-dialog">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                              </div>
+                              <div class="modal-body">
+                                ...
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary">Save changes</button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+
+      function openModal(id) {
+        
+        if (window.confirm("Do you really want delete this product?")) {
+          
+          let url = 'http://localhost:8000/product/' + id + '/delete'; 
+          
+          fetch(url)
+          .then(res => res.json()) // or res.json()
+          .then(res => console.log(res))
+        }
+
+      }
+    </script>
+{% endblock %}
