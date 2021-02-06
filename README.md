@@ -1,5 +1,5 @@
 # Prueba Optime
-### Dumny data
+### Dummy data
 ```sh
 bin/console doctrine:fixtures:load
 ```
