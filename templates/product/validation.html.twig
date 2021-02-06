@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}New Product!{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+</style>
+
+<div class="example-wrapper">
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h3>The author has the following errors</h3>
+                  <ul>
+                  {% for error in errors %}
+                      <li>{{ error.message }}</li>
+                  {% endfor %}
+                  </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

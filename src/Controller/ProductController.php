@@ -38,37 +38,14 @@ class ProductController extends AbstractController
     /**
      * @Route("/product/new", name="new_product")
      */
-    public function new(EntityManagerInterface $em, Request $request, ValidatorInterface $validator): Response
+    public function new(ValidatorInterface $validator, EntityManagerInterface $em, Request $request): Response
     {
         $form = $this->createForm(ProductFormType::class);
 
         $form->handleRequest($request);
         
-        if ($form->isSubmitted() && $form->isValid()) {
+        if ($form->isSubmitted() && $form->isValid()) {          
 
-            // $data = $form->getData();
-
-            // $newProduct = new Product();
-            // $newProduct
-            //     ->setCode($data['code']);
-
-            // $data = $form->getData();
-
-            // $errors = $validator->validate($newProduct);
-
-            // if (count($errors) > 0) {
-            //     /*
-            //     * Uses a __toString method on the $errors variable which is a
-            //     * ConstraintViolationList object. This gives us a nice string
-            //     * for debugging.
-            //     */
-            //     $errorsString = (string) $errors;
-
-            //     return new Response($errorsString);
-            // }
-
-            // return new Response('The author is valid! Yes!');
-            
             $data = $form->getData();
 
 
@@ -85,11 +62,29 @@ class ProductController extends AbstractController
                 ->setBrand($data['brand'])
                 ->setCategory($category)
                 ->setPrice($data['price']);
+            
+            $em->persist($newProduct);
 
+            $errors = $validator->validate($newProduct);
 
-           
-                $em->persist($newProduct);
+            if (count($errors) > 0) {
+                /*
+                * Uses a __toString method on the $errors variable which is a
+                * ConstraintViolationList object. This gives us a nice string
+                * for debugging.
+                */
+                // $errorsString = (string) $errors;
+
+                // return new Response($errorsString);
+
+                return $this->render('product/validation.html.twig', [
+                    'errors' => $errors,
+                ]);
+
+            }else {
+                
                 $em->flush();
+            }
            
             
         }

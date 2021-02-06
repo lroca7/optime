@@ -5,6 +5,7 @@ namespace App\Entity;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
 /**
  * @ORM\Entity(repositoryClass=ProductRepository::class)
@@ -19,15 +20,23 @@ class Product extends Entity
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)     
-     * @Assert\NotBlank(message="Code is required")
-     * @Assert\NotNull(message="Code is required")     
-     * @Assert\Regex("/[a-zA-Z0-9]/")
+     * @ORM\Column(type="string", length=255, unique=true)        
+     * @Assert\Length(
+     *      min = 1,
+     *      max = 10,
+     *      minMessage = "Your code must be at least {{ limit }} characters long",
+     *      maxMessage = "Your code name cannot be longer than {{ limit }} characters"
+     * )
      */
     private $code;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
+     * @Assert\NotNull(message="Name should not be null")
+     * @Assert\Length(
+     *      min = 4,
+     *      minMessage = "Your name must be at least {{ limit }} characters long"
+     * )
      */
     private $name;
 
@@ -49,6 +58,7 @@ class Product extends Entity
 
     /**
      * @ORM\Column(type="float")
+     * @Assert\Regex("/^[1-9][0-9]*$/")
      */
     private $price;
 
@@ -127,5 +137,18 @@ class Product extends Entity
         $this->price = $price;
 
         return $this;
+    }
+
+
+    /**
+     * @Assert\Callback
+     */
+    public function validate(ExecutionContextInterface $context, $payload)
+    {
+        if (stripos($this->getCode(), 'the borg') !== false) {
+            $context->buildViolation('Um.. the Bork kinda makes us nervous')
+                ->atPath('title')
+                ->addViolation();
+        }
     }
 }
