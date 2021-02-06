@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Repository\CategoryRepository;
 use App\Form\CategoryFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -10,6 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Knp\Component\Pager\PaginatorInterface;
 
 class CategoryController extends AbstractController
 {
@@ -44,50 +46,31 @@ class CategoryController extends AbstractController
             $em->persist($newCategory);
             $em->flush();
 
-            // return $this->redirectToRoute('categories');
         }
         
         return $this->render('category/new.html.twig', [
             'categoryForm' => $form->createView()
         ]);
 
-        // $em = $this->getDoctrine()->getManager();
-
-        // $newCategory = new Category();
-
-        // $newCategory
-        //     ->setName('Tomate')
-        //     // ->setCreatedAt(new \DateTime())
-        //     // ->setUpdatedAt(new \DateTime())
-        //     ->setActive(true);
-
-        // $em->persist($newCategory);
-        // $em->flush();
-
-        // return new Response('Saved new category with id '.$newCategory->getId());
     }
 
     /**
      * @Route("/categories", name="list_category")
      */
-    public function list(): Response
+    public function list(CategoryRepository $repository, Request $request, PaginatorInterface $paginator): Response
     {
-        $em = $this->getDoctrine()->getManager();
-        $categoryRepository = $em->getRepository(Category::class);
+        $q = $request->query->get('q');
+        $queryBuilder = $repository->getCategories($q);
 
-        $categories = $categoryRepository->findAll();
-        $data = [];
+        $pagination = $paginator->paginate(
+            $queryBuilder, /* query NOT result */
+            $request->query->getInt('page', 1)/*page number*/,
+            5/*limit per page*/
+        );
 
-        foreach ($categories as $category) {
-            $data[] = [
-                'id' => $category->getId(),
-                'name' => $category->getName(),
-                'active' => $category->getActive(),
-                'createdAt' => $category->getCreatedAt(),
-                'updatedAt' => $category->getUpdatedAt(),
-            ];
-        }
+        return $this->render('category/list.html.twig', [
+            'products' => $pagination,
+        ]);
 
-        return new JsonResponse($data, Response::HTTP_OK);
     }
 }

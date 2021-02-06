@@ -93,26 +93,6 @@ class ProductController extends AbstractController
             'productForm' => $form->createView()
         ]);
 
-        // $em = $this->getDoctrine()->getManager();
-
-        // $categoryRepository = $em->getRepository(Category::class);
-        
-        // $category = $categoryRepository->find(1);
-
-        // $newProduct = new Product();
-
-        // $newProduct
-        //     ->setCode('1')
-        //     ->setName('Dolex')
-        //     ->setDescription('Antinflamatorio')
-        //     ->setBrand('Genfar')
-        //     ->setCategory($category)
-        //     ->setPrice(12000);
-
-        // $em->persist($newProduct);
-        // $em->flush();
-
-        // return new Response('Saved new product with id '.$newProduct->getId());
     }
 
     /**
@@ -121,7 +101,7 @@ class ProductController extends AbstractController
     public function list(ProductRepository $repository, Request $request, PaginatorInterface $paginator): Response
     {
         $q = $request->query->get('q');
-        $queryBuilder = $repository->getWithSearchQueryBuilder($q);
+        $queryBuilder = $repository->getProducts($q);
 
         $pagination = $paginator->paginate(
             $queryBuilder, /* query NOT result */
@@ -132,39 +112,7 @@ class ProductController extends AbstractController
         return $this->render('product/list.html.twig', [
             'products' => $pagination,
         ]);
-
-        // // $em = $this->getDoctrine()->getManager();
-
-        // // $products = $em->getRepository(Product::class)
-        // //     ->findAll();
-
-        // // return $this->render('product/product.html.twig', [
-        // //     'products' => $products
-        // // ]);
-
-        // $em = $this->getDoctrine()->getManager();
-        // $productRepository = $em->getRepository(Product::class);
-
-        // $products = $productRepository->findAll();
-        // $data = [];
-
-        // foreach ($products as $product) {
-        //     $data[] = [
-        //         'id' => $product->getId(),
-        //         'createdAt' => $product->getCreatedAt(),
-        //         'updatedAt' => $product->getUpdatedAt(),
-        //         'name' => $product->getName(),
-        //         'description' => $product->getDescription(),
-        //         'brand' => $product->getBrand(),
-        //         'category' => [
-        //             'id' => $product->getCategory()->getId(),
-        //             'name' => $product->getCategory()->getName(),
-        //         ],
-        //         'price' => $product->getPrice()
-        //     ];
-        // }
-
-        // return new JsonResponse($data, Response::HTTP_OK);
+     
     }
 
     /**
@@ -177,7 +125,6 @@ class ProductController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->persist($product);
             $em->flush();
-            // $this->addFlash('success', 'Product Updated! Inaccuracies squashed!');
             
         }
         return $this->render('product/edit.html.twig', [

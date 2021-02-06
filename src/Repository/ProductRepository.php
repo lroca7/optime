@@ -22,7 +22,7 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * @param string|null $term
      */
-    public function getWithSearchQueryBuilder(?string $term): QueryBuilder
+    public function getProducts(?string $term): QueryBuilder
     {
         $qb = $this->createQueryBuilder('c');
             // ->addSelect('a');

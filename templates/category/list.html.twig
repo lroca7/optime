@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+{# {% import "macros.html" as macros %} #}
+
+{% block title %}Categories{% endblock %}
+
+{% block body %}
+<style>
+    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
+    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
+
+    table {
+      border: 1px solid lightgray;
+    }
+
+    table .actions {
+      text-align: right;
+    }
+
+    .table-pagination{
+      display: flex;
+      justify-content: flex-end;
+    }
+</style>
+
+<div class="example-wrapper">
+
+
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <h3>Categories ({{ products.getTotalItemCount }})</h3>                
+                <a class="btn btn-xs btn-primary mb-2"  href="{{ path('new_category') }}">                  
+                  New
+                </a>
+                <table class="table table-hover">
+                    <tr>
+                        <th>Name</th>
+                    </tr>
+                    {% for product in products %}
+                      <tr>
+                            <td>{{ product.name }}</td>
+                      </tr>
+                      {% else %}
+                          <tr>
+                              <td colspan="4" class="text-center">
+                                  Category not found
+                              </td>
+                          </tr>
+                      {% endfor %}
+                    
+                </table>
+                
+                {{ knp_pagination_render(products) }}
+               
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
