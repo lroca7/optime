@@ -38,6 +38,7 @@
                 <a class="btn btn-xs btn-primary mb-2"  href="{{ path('new_product') }}">                  
                   New
                 </a>
+                <h1>Manage Comments ({{ products.getTotalItemCount }})</h1>
                 <table class="table table-hover">
                     <tr>
                         <th>Code</th>
@@ -47,6 +48,29 @@
                         <th >&nbsp;</th>
                     </tr>
                     {% for product in products %}
+                      <tr>
+                           <td>{{ product.code }}</td>
+                            <td>{{ product.name }}</td>                            
+                            <td>{{ product.brand }}</td>
+                            <td>{{ product.price }}</td>
+                            <td class="actions">
+                                <a href="{{ path('product_edit', {'id': product.id}) }}" class="btn btn-xs btn-primary">
+                                  Edit
+                                </a>
+                                <a class="btn btn-xs btn-danger"  onclick="openModal({{ product.id }})">
+                                  Delete
+                                </a>                               
+                            </td>
+                      </tr>
+                      {% else %}
+                          <tr>
+                              <td colspan="4" class="text-center">
+                                  No product found
+                              </td>
+                          </tr>
+                      {% endfor %}
+                    
+                    {# {% for product in products %}
                         <tr>
                             <td>{{ product.code }}</td>
                             <td>{{ product.name }}</td>                            
@@ -58,15 +82,16 @@
                                 </a>
                                 <a class="btn btn-xs btn-danger"  onclick="openModal({{ product.id }})">
                                   Delete
-                                </a>
-                                {# <button onclick="openModal()">Show Approved Course</button>    #}
-                              
+                                </a>                               
                             </td>
-                        </tr>
-                        
-                    {% endfor %}
+                        </tr>                        
+                    {% endfor %} #}
                 </table>
-                <nav class="table-pagination" aria-label="Page navigation example">
+                
+               <div class="navigation">
+                  {{ knp_pagination_render(products) }}
+              </div>
+                {# <nav class="table-pagination" aria-label="Page navigation example">
                   <ul class="pagination">
                     <li class="page-item"><a class="page-link" href="#">Previous</a></li>
                     <li class="page-item"><a class="page-link" href="#">1</a></li>
@@ -74,7 +99,7 @@
                     <li class="page-item"><a class="page-link" href="#">3</a></li>
                     <li class="page-item"><a class="page-link" href="#">Next</a></li>
                   </ul>
-                </nav>
+                </nav> #}
             </div>
         </div>
     </div>

@@ -5,7 +5,7 @@ namespace App\Repository;
 use App\Entity\Product;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
-
+use Doctrine\ORM\QueryBuilder;
 /**
  * @method Product|null find($id, $lockMode = null, $lockVersion = null)
  * @method Product|null findOneBy(array $criteria, array $orderBy = null)
@@ -17,6 +17,23 @@ class ProductRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Product::class);
+    }
+
+    /**
+     * @param string|null $term
+     */
+    public function getWithSearchQueryBuilder(?string $term): QueryBuilder
+    {
+        $qb = $this->createQueryBuilder('c');
+            // ->addSelect('a');
+        // if ($term) {
+        //     $qb->andWhere('c.content LIKE :term OR c.authorName LIKE :term OR a.title LIKE :term')
+        //         ->setParameter('term', '%' . $term . '%')
+        //     ;
+        // }
+        return $qb
+            ->orderBy('c.createdAt', 'DESC')
+        ;
     }
 
     // /**

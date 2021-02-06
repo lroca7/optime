@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Product;
 use App\Entity\Category;
 use App\Form\ProductFormType;
+use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,6 +20,8 @@ use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 // Include PhpSpreadsheet required namespaces
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+
+use Knp\Component\Pager\PaginatorInterface;
 
 class ProductController extends AbstractController
 {
@@ -43,47 +46,13 @@ class ProductController extends AbstractController
         
         if ($form->isSubmitted() && $form->isValid()) {
 
-            $data = $form->getData();
-
-            $newProduct = new Product();
-            $newProduct
-                ->setCode($data['code']);
-
-            $data = $form->getData();
-
-            $errors = $validator->validate($newProduct);
-
-            if (count($errors) > 0) {
-                /*
-                * Uses a __toString method on the $errors variable which is a
-                * ConstraintViolationList object. This gives us a nice string
-                * for debugging.
-                */
-                $errorsString = (string) $errors;
-
-                return new Response($errorsString);
-            }
-
-            return new Response('The author is valid! Yes!');
-            
-            // dd($form->getData());
             // $data = $form->getData();
 
-            // print_r($data);
-
-            // $categoryRepository = $em->getRepository(Category::class);
-                    
-            // $category = $categoryRepository->find($data['category']);
             // $newProduct = new Product();
-
-
             // $newProduct
-            //     ->setCode($data['code'])
-            //     ->setName($data['name'])
-            //     ->setDescription($data['description'])
-            //     ->setBrand($data['brand'])
-            //     ->setCategory($category)
-            //     ->setPrice($data['price']);
+            //     ->setCode($data['code']);
+
+            // $data = $form->getData();
 
             // $errors = $validator->validate($newProduct);
 
@@ -96,11 +65,32 @@ class ProductController extends AbstractController
             //     $errorsString = (string) $errors;
 
             //     return new Response($errorsString);
-            // }else {
-            //     $em->persist($newProduct);
-            //     $em->flush();
             // }
 
+            // return new Response('The author is valid! Yes!');
+            
+            $data = $form->getData();
+
+
+            $categoryRepository = $em->getRepository(Category::class);
+                    
+            $category = $categoryRepository->find($data['category']);
+            $newProduct = new Product();
+
+
+            $newProduct
+                ->setCode($data['code'])
+                ->setName($data['name'])
+                ->setDescription($data['description'])
+                ->setBrand($data['brand'])
+                ->setCategory($category)
+                ->setPrice($data['price']);
+
+
+           
+                $em->persist($newProduct);
+                $em->flush();
+           
             
         }
         
@@ -133,16 +123,29 @@ class ProductController extends AbstractController
     /**
      * @Route("/products", name="list_products")
      */
-    public function list(): Response
+    public function list(ProductRepository $repository, Request $request, PaginatorInterface $paginator): Response
     {
-        $em = $this->getDoctrine()->getManager();
+        $q = $request->query->get('q');
+        $queryBuilder = $repository->getWithSearchQueryBuilder($q);
 
-        $products = $em->getRepository(Product::class)
-            ->findAll();
+        $pagination = $paginator->paginate(
+            $queryBuilder, /* query NOT result */
+            $request->query->getInt('page', 1)/*page number*/,
+            5/*limit per page*/
+        );
 
         return $this->render('product/list.html.twig', [
-            'products' => $products
+            'products' => $pagination,
         ]);
+
+        // // $em = $this->getDoctrine()->getManager();
+
+        // // $products = $em->getRepository(Product::class)
+        // //     ->findAll();
+
+        // // return $this->render('product/product.html.twig', [
+        // //     'products' => $products
+        // // ]);
 
         // $em = $this->getDoctrine()->getManager();
         // $productRepository = $em->getRepository(Product::class);
